@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+weather-api-app/node_modules
 /dist
 
 

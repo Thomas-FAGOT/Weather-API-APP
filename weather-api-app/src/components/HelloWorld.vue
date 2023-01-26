@@ -1,8 +1,6 @@
 <template>
-  <div class="hello">
-    <div>
-      <h1> altitude:{{ altitude }}</h1>
-    </div>
+  <div class="search-bar">
+    <input type="text" v-model="query" @keyup="search" placeholder="Rechercher une ville" />
   </div>
 </template>
 
@@ -13,19 +11,26 @@ export default {
   name: 'HelloWorld',
   data(){
     return{
-      altitude: null,
+      meteo: null,
+      ville: null,
     }
   },
   mounted(){
     axios
-    .get('https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m')
+    .get('https://geocoding-api.open-meteo.com/v1/search?name=rennes&language=fr')
     .then((reponse) => {
-      this.altitude = reponse.data.latitude
-      console.log(this.altitude)
+      this.ville = reponse.data.results[0].name
+      console.log(this.ville)
+    })
+  },
+  test(){
+    axios
+    .get('https://api.open-meteo.com//v1/meteofrance?latitude=48.11&longitude=-1.67')
+    .then((reponse) => {
+      this.meteo = reponse.data
+      console.log(this.meteo.latitude)
     })
   }
 }
 </script>
 
-<style scoped>
-</style>

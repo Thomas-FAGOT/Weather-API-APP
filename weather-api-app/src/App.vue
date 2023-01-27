@@ -1,5 +1,5 @@
 <template>
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
   <div class="header">
     <div class="logo">
 
@@ -10,7 +10,10 @@
   </div>
   <div class="content">
     <div class="searchBar">
-      <input type="text" id="position"  placeholder="Ville" v-model="requete" v-on:keypress="meteoApi">
+      <div class="searchBarInput">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="position"  placeholder="Ville ..." v-model="requete" @input="meteoApi">
+      </div>
       <ul v-if="city != null">
         <li v-for="cityName in city" :key="cityName.id"> {{ cityName.name }} - {{ cityName.admin1 }} - {{ cityName.country }}</li>
       </ul>
@@ -20,26 +23,32 @@
     </div>
     <div class="answer" id="answer">
       <div class="answer" id="answer_weather" v-if="meteo">
-        <h2> météo du jour </h2>
+        <div class="answer_title">
+          <h2> météo du jour </h2>
+        </div>
         <h3>Temps : {{ temps }}</h3>
         <h4>Température : {{ meteo.current_weather.temperature }}°C</h4>
         <h4>Vitesse du vent : {{ meteo.current_weather.windspeed }}Km/h</h4>
       </div>
-      <div class="answer" id="answer_weather_previsionel_0" v-if="meteo">
-        <h2> météo des jours à venir </h2>
-        <h3>{{ meteo.daily.time[0] }}</h3>
-        <h4>Température max : {{ meteo.daily.temperature_2m_max[0] }}</h4>
-        <h4>Température min : {{ meteo.daily.temperature_2m_min[0] }}°C</h4>
-      </div>
-      <div class="answer" id="answer_weather_previsionel_1" v-if="meteo">
-        <h3>{{ meteo.daily.time[1] }}</h3>
-        <h4>Température max : {{ meteo.daily.temperature_2m_max[1] }}</h4>
-        <h4>Température min : {{ meteo.daily.temperature_2m_min[1] }}°C</h4>
-      </div>
-      <div class="answer" id="answer_weather_previsionel_2" v-if="meteo">
-        <h3>{{ meteo.daily.time[2] }}</h3>
-        <h4>Température max : {{ meteo.daily.temperature_2m_max[2] }}</h4>
-        <h4>Température min : {{ meteo.daily.temperature_2m_min[2] }}°C</h4>
+      <div class="answer_weather_presionnel">
+        <div class="answer" id="answer_weather_previsionnel_0" v-if="meteo">
+          <div class="answer_title">
+            <h2> météo du jour </h2>
+          </div>
+          <h3>{{ meteo.daily.time[0] }}</h3>
+          <h4>Température max : {{ meteo.daily.temperature_2m_max[0] }}</h4>
+          <h4>Température min : {{ meteo.daily.temperature_2m_min[0] }}°C</h4>
+        </div>
+        <div class="answer" id="answer_weather_previsionnel_1" v-if="meteo">
+          <h3>{{ meteo.daily.time[1] }}</h3>
+          <h4>Température max : {{ meteo.daily.temperature_2m_max[1] }}</h4>
+          <h4>Température min : {{ meteo.daily.temperature_2m_min[1] }}°C</h4>
+        </div>
+        <div class="answer" id="answer_weather_previsionnel_2" v-if="meteo">
+          <h3>{{ meteo.daily.time[2] }}</h3>
+          <h4>Température max : {{ meteo.daily.temperature_2m_max[2] }}</h4>
+          <h4>Température min : {{ meteo.daily.temperature_2m_min[2] }}°C</h4>
+        </div>
       </div>
     </div>
   </div>
@@ -49,6 +58,7 @@
 </template>
 
 <script>
+import '@/assets/main.css';
 import axios from 'axios';
 export default {
   name: 'App',
@@ -117,7 +127,9 @@ export default {
         this.city = reponse.data.results
         console.log(this.city)
 //-------------------------------------------------------------------------------------------//   
-        if (e.key == "Enter"){
+        if (e.key === "Enter"){
+          console.log('coucou')
+
         // Déclaration de variable
             // Appel de l'API
           axios       

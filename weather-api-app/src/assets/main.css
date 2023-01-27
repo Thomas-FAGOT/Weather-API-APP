@@ -1,0 +1,99 @@
+@import url(reset.css);
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;700&display=swap');
+
+body{
+    font-family: 'Nunito', sans-serif;
+}
+  
+.name{
+    background: linear-gradient(to right,rgb(190, 171, 224), rgb(92, 56, 154));
+    border-bottom-left-radius: 100%;
+    border-bottom-right-radius: 100%;
+    color: white;
+    padding: 40px 80px 140px;
+}
+
+.name h1 {
+    display: flex;
+    justify-content: center;
+}
+  
+.searchBar{
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.386);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+    margin: -100px 15% 0px;
+}
+ 
+.searchBarInput{
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+}
+
+.material-symbols-outlined{
+    display: flex;
+    position: relative;
+}
+
+.searchBar input{
+    padding-right: 75px;
+    border: none;
+    border-radius: 10px;
+    position: relative;
+}
+
+.searchBar input:focus{
+    outline: none;
+}
+  
+.searchBar ul{
+    border-radius: 10px;
+    padding: 5px;
+    padding-top: 20px;
+    margin-top: -20px;
+}
+
+.answer {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#answer_geolocalisation {
+    display: flex;
+    justify-content: center;
+    margin-top: 100px;
+}
+
+#answer_geolocalisation button{
+    background: linear-gradient(to right,rgb(190, 171, 224), rgb(92, 56, 154));
+    border-radius: 10px;
+    padding: 10px 5px;
+    margin-top: 10px;
+    color: white;
+    border: none;
+}
+
+#answer {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(to right,rgb(190, 171, 224), rgb(92, 56, 154));
+    margin-top: 50px;
+}
+
+#answer_weather, #answer_weather_previsionnel_0, #answer_weather_previsionnel_1, #answer_weather_previsionnel_2{
+    background-color: rgba(255, 255, 255, 0.386);
+    border-radius: 10px;
+    padding: 5px;
+    margin: 10px;
+}
+
+.answer_weather_presionnel{
+    display: flex;
+    flex-direction: row;
+}

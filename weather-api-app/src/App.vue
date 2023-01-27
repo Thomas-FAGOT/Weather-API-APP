@@ -11,8 +11,8 @@
   <div class="content">
     <div class="searchBar">
       <input type="text" id="position"  placeholder="Ville" v-model="requete" v-on:keypress="meteoApi">
-      <ul v-if="city != undefined">
-        <li v-for="cityName in city" :key="cityName.id"> {{ cityName.name }}</li>
+      <ul v-if="city != null">
+        <li v-for="cityName in city" :key="cityName.id"> {{ cityName.name }} - {{ cityName.admin1 }} - {{ cityName.country }}</li>
       </ul>
     </div>
     <div class="answer" id="answer_geolocalisation">
@@ -55,14 +55,60 @@ export default {
   data(){
     return{
     requete: '',
-    city: undefined,
-    meteo: undefined,
-    temps: undefined,
+    city: null,
+    meteo: null,
+    temps: null,
     url_Pays: 'https://geocoding-api.open-meteo.com/v1/search?name=',
     url_meteo: 'https://api.open-meteo.com/v1/forecast?',
     }
   },
   methods: {
+    
+    defDate(jour){
+      var date = new Date();
+      date.setDate(date.getDate() + jour);
+      var getYear = date.toLocaleString("default", { year: "numeric" });
+      var getMonth = date.toLocaleString("default", { month: "2-digit" });
+      var getDay = (date.toLocaleString("default", { day: "2-digit" }));
+      var current_date = getYear + "-" + getMonth + "-" + getDay;
+      return current_date;
+    },
+    
+    searchCity(){
+
+    },
+
+    defWeatherCode(){
+      if (this.meteo.current_weather.weathercode == 0){
+        this.temps = "Clear sky"
+      } else if (this.meteo.current_weather.weathercode > 0 && this.meteo.current_weather.weathercode <= 3){
+        this.temps = "Mainly clear, partly cloudy, and overcast"
+      } else if (this.meteo.current_weather.weathercode > 44 && this.meteo.current_weather.weathercode <= 48){
+        this.temps = "Fog and depositing rime fog"
+      } else if (this.meteo.current_weather.weathercode > 50 && this.meteo.current_weather.weathercode <= 55){
+        this.temps = "Drizzle: Light, moderate, and dense intensity"
+      } else if (this.meteo.current_weather.weathercode > 55 && this.meteo.current_weather.weathercode <= 57){
+        this.temps = "Freezing Drizzle: Light and dense intensity"
+      } else if (this.meteo.current_weather.weathercode > 60 && this.meteo.current_weather.weathercode <= 65){
+        this.temps = "Rain: Slight, moderate and heavy intensity"
+      } else if (this.meteo.current_weather.weathercode > 65 && this.meteo.current_weather.weathercode <= 67){
+        this.temps = "Freezing Rain: Light and heavy intensity"
+      } else if (this.meteo.current_weather.weathercode > 70 && this.meteo.current_weather.weathercode <= 75){
+        this.temps = "Snow fall: Slight, moderate, and heavy intensity"
+      } else if (this.meteo.current_weather.weathercode == 77){
+        this.temps = "Snow grains"
+      } else if (this.meteo.current_weather.weathercode > 79 && this.meteo.current_weather.weathercode <= 82){
+        this.temps = "Rain showers: Slight, moderate, and violent"
+      } else if (this.meteo.current_weather.weathercode > 84 && this.meteo.current_weather.weathercode <= 86){
+        this.temps = "Snow showers slight and heavy"
+      } else if (this.meteo.current_weather.weathercode == 95){
+        this.temps = "Thunderstorm: Slight or moderate"
+      } else if (this.meteo.current_weather.weathercode > 95 && this.meteo.current_weather.weathercode <= 99){
+        this.temps = "Thunderstorm with slight and heavy hail"
+      } 
+    },
+
+
     meteoApi(e){
 //-------------------------------------------------------------------------------------------//
       axios
@@ -73,59 +119,18 @@ export default {
 //-------------------------------------------------------------------------------------------//   
         if (e.key == "Enter"){
         // Déclaration de variable
-          var date = new Date();
-          date.setDate(date.getDate() + 1);
-          var getYear = date.toLocaleString("default", { year: "numeric" });
-          var getMonth = date.toLocaleString("default", { month: "2-digit" });
-          var getDay = (date.toLocaleString("default", { day: "2-digit" }));
-          var current_date = getYear + "-" + getMonth + "-" + getDay;
-            
-          date.setDate(date.getDate() + 2);
-          getYear = date.toLocaleString("default", { year: "numeric" });
-          getMonth = date.toLocaleString("default", { month: "2-digit" });
-          getDay = (date.toLocaleString("default", { day: "2-digit" }));
-          var post_day = getYear + "-" + getMonth + "-" + getDay;
-          console.log(current_date + "\n" + post_day);
-
             // Appel de l'API
           axios       
-          .get(`${this.url_meteo}latitude=${this.city[0].latitude}&longitude=${this.city[0].longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${current_date}&end_date=${post_day}`)
+          .get(`${this.url_meteo}latitude=${this.city[0].latitude}&longitude=${this.city[0].longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${this.defDate(1)}&end_date=${this.defDate(3)}`)
           .then(reponse => {
             this.meteo = reponse.data
-            if (this.meteo.current_weather.weathercode == 0){
-              this.temps = "Clear sky"
-            } else if (this.meteo.current_weather.weathercode > 0 && this.meteo.current_weather.weathercode <= 3){
-              this.temps = "Mainly clear, partly cloudy, and overcast"
-            } else if (this.meteo.current_weather.weathercode > 44 && this.meteo.current_weather.weathercode <= 48){
-              this.temps = "Fog and depositing rime fog"
-            } else if (this.meteo.current_weather.weathercode > 50 && this.meteo.current_weather.weathercode <= 55){
-              this.temps = "Drizzle: Light, moderate, and dense intensity"
-            } else if (this.meteo.current_weather.weathercode > 55 && this.meteo.current_weather.weathercode <= 57){
-              this.temps = "Freezing Drizzle: Light and dense intensity"
-            } else if (this.meteo.current_weather.weathercode > 60 && this.meteo.current_weather.weathercode <= 65){
-              this.temps = "Rain: Slight, moderate and heavy intensity"
-            } else if (this.meteo.current_weather.weathercode > 65 && this.meteo.current_weather.weathercode <= 67){
-              this.temps = "Freezing Rain: Light and heavy intensity"
-            } else if (this.meteo.current_weather.weathercode > 70 && this.meteo.current_weather.weathercode <= 75){
-              this.temps = "Snow fall: Slight, moderate, and heavy intensity"
-            } else if (this.meteo.current_weather.weathercode == 77){
-              this.temps = "Snow grains"
-            } else if (this.meteo.current_weather.weathercode > 79 && this.meteo.current_weather.weathercode <= 82){
-              this.temps = "Rain showers: Slight, moderate, and violent"
-            } else if (this.meteo.current_weather.weathercode > 84 && this.meteo.current_weather.weathercode <= 86){
-              this.temps = "Snow showers slight and heavy"
-            } else if (this.meteo.current_weather.weathercode == 95){
-              this.temps = "Thunderstorm: Slight or moderate"
-            } else if (this.meteo.current_weather.weathercode > 95 && this.meteo.current_weather.weathercode <= 99){
-              this.temps = "Thunderstorm with slight and heavy hail"
-            } 
-            console.log(this.meteo);
+            this.defWeatherCode();
           })
           .catch(err => {
             console.error(err);
           })
           this.requete = ''
-          this.city = undefined
+          this.city = null
         }
       })
       .catch(err => {
@@ -136,53 +141,12 @@ export default {
     meteoApiGeolocalisationAuto(){
       // Déclaration de variable
       this.city = null
-      var date = new Date();
-      date.setDate(date.getDate() + 1);
-      var getYear = date.toLocaleString("default", { year: "numeric" });
-      var getMonth = date.toLocaleString("default", { month: "2-digit" });
-      var getDay = (date.toLocaleString("default", { day: "2-digit" }));
-      var current_date = getYear + "-" + getMonth + "-" + getDay;
-          
-      date.setDate(date.getDate() + 2);
-      getYear = date.toLocaleString("default", { year: "numeric" });
-      getMonth = date.toLocaleString("default", { month: "2-digit" });
-      getDay = (date.toLocaleString("default", { day: "2-digit" }));
-      var post_day = getYear + "-" + getMonth + "-" + getDay;
-      console.log(current_date + "\n" + post_day);
-      
       navigator.geolocation.getCurrentPosition((position) =>{
         axios
-        .get(`${this.url_meteo}latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${current_date}&end_date=${post_day}`)
+        .get(`${this.url_meteo}latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${this.defDate(1)}&end_date=${this.defDate(3)}`)
         .then(reponse => {
           this.meteo = reponse.data
-          if (this.meteo.current_weather.weathercode == 0){
-            this.temps = "Clear sky"
-          } else if (this.meteo.current_weather.weathercode > 0 && this.meteo.current_weather.weathercode <= 3){
-            this.temps = "Mainly clear, partly cloudy, and overcast"
-          } else if (this.meteo.current_weather.weathercode > 44 && this.meteo.current_weather.weathercode <= 48){
-            this.temps = "Fog and depositing rime fog"
-          } else if (this.meteo.current_weather.weathercode > 50 && this.meteo.current_weather.weathercode <= 55){
-            this.temps = "Drizzle: Light, moderate, and dense intensity"
-          } else if (this.meteo.current_weather.weathercode > 55 && this.meteo.current_weather.weathercode <= 57){
-            this.temps = "Freezing Drizzle: Light and dense intensity"
-          } else if (this.meteo.current_weather.weathercode > 60 && this.meteo.current_weather.weathercode <= 65){
-            this.temps = "Rain: Slight, moderate and heavy intensity"
-          } else if (this.meteo.current_weather.weathercode > 65 && this.meteo.current_weather.weathercode <= 67){
-            this.temps = "Freezing Rain: Light and heavy intensity"
-          } else if (this.meteo.current_weather.weathercode > 70 && this.meteo.current_weather.weathercode <= 75){
-            this.temps = "Snow fall: Slight, moderate, and heavy intensity"
-          } else if (this.meteo.current_weather.weathercode == 77){
-            this.temps = "Snow grains"
-          } else if (this.meteo.current_weather.weathercode > 79 && this.meteo.current_weather.weathercode <= 82){
-            this.temps = "Rain showers: Slight, moderate, and violent"
-          } else if (this.meteo.current_weather.weathercode > 84 && this.meteo.current_weather.weathercode <= 86){
-            this.temps = "Snow showers slight and heavy"
-          } else if (this.meteo.current_weather.weathercode == 95){
-            this.temps = "Thunderstorm: Slight or moderate"
-          } else if (this.meteo.current_weather.weathercode > 95 && this.meteo.current_weather.weathercode <= 99){
-            this.temps = "Thunderstorm with slight and heavy hail"
-          } 
-          console.log(this.meteo);
+          this.defWeatherCode();
         })
         .catch(err => {
           console.error(err);

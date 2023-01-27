@@ -11,15 +11,14 @@
   <div class="content">
     <div class="searchBar">
       <input type="text" id="position"  placeholder="Ville" v-model="requete" v-on:keypress="meteoApi">
+      <ul v-if="city != undefined">
+        <li v-for="cityName in city" :key="cityName.id"> {{ cityName.name }}</li>
+      </ul>
     </div>
     <div class="answer" id="answer_geolocalisation">
       <button v-on:click="meteoApiGeolocalisationAuto"> Quel temps fait il ici ? </button>
     </div>
     <div class="answer" id="answer">
-      <div class="answer" id="answer_city" v-if="city">
-        <h2> Infromation sur la ville </h2>
-        <h3>Pays : {{ city.results[0].name }}</h3>
-      </div>
       <div class="answer" id="answer_weather" v-if="meteo">
         <h2> météo du jour </h2>
         <h3>Temps : {{ temps }}</h3>
@@ -64,23 +63,23 @@ export default {
     }
   },
   methods: {
-
     meteoApi(e){
-      if (e.key == "Enter"){
 //-------------------------------------------------------------------------------------------//
-        axios
-        .get(`${this.url_Pays}${this.requete}&language=fr`)
-        .then(reponse => {
-          this.city = reponse.data
-//-------------------------------------------------------------------------------------------//          
-          // Déclaration de variable
+      axios
+      .get(`${this.url_Pays}${this.requete}&language=fr`)
+      .then(reponse => {
+        this.city = reponse.data.results
+        console.log(this.city)
+//-------------------------------------------------------------------------------------------//   
+        if (e.key == "Enter"){
+        // Déclaration de variable
           var date = new Date();
           date.setDate(date.getDate() + 1);
           var getYear = date.toLocaleString("default", { year: "numeric" });
           var getMonth = date.toLocaleString("default", { month: "2-digit" });
           var getDay = (date.toLocaleString("default", { day: "2-digit" }));
           var current_date = getYear + "-" + getMonth + "-" + getDay;
-          
+            
           date.setDate(date.getDate() + 2);
           getYear = date.toLocaleString("default", { year: "numeric" });
           getMonth = date.toLocaleString("default", { month: "2-digit" });
@@ -88,10 +87,9 @@ export default {
           var post_day = getYear + "-" + getMonth + "-" + getDay;
           console.log(current_date + "\n" + post_day);
 
-          // Appel de l'API
-          axios
-               
-          .get(`${this.url_meteo}latitude=${this.city.results[0].latitude}&longitude=${this.city.results[0].longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${current_date}&end_date=${post_day}`)
+            // Appel de l'API
+          axios       
+          .get(`${this.url_meteo}latitude=${this.city[0].latitude}&longitude=${this.city[0].longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${current_date}&end_date=${post_day}`)
           .then(reponse => {
             this.meteo = reponse.data
             if (this.meteo.current_weather.weathercode == 0){
@@ -126,13 +124,13 @@ export default {
           .catch(err => {
             console.error(err);
           })
-        })
-        .catch(err => {
-          console.error(err);
-        });
-        
-        this.requete = ''
-      }
+          this.requete = ''
+          this.city = undefined
+        }
+      })
+      .catch(err => {
+        console.error(err);
+      }); 
     },
 
     meteoApiGeolocalisationAuto(){

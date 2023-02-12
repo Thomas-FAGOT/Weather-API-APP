@@ -1,40 +1,37 @@
 <template>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
   <div class="header">
-    <div class="logo">
-
+    <div class="Action" id="Action_geolocalisation">
+      <button v-on:click="meteoApiGeolocalisationAuto"> Météo </button>
     </div>
-    <div class="name">
-      <h1>Weather Forecast API</h1>
-    </div>
-  </div>
-  <div class="content">
     <div class="searchBar">
       <div class="searchBarInput">
         <span class="material-symbols-outlined">search</span>
-        <input type="text" id="position"  placeholder="Ville ..." v-model="requete" @input="meteoApi">
+        <input type="text" id="position" placeholder="Ville" v-model="requete" @input="meteoApi">
       </div>
-      <ul v-if="city != null">
-        <li v-for="cityName in city" :key="cityName.id"> {{ cityName.name }} - {{ cityName.admin1 }} - {{ cityName.country }}</li>
+      <ul v-if="cityList != null">
+        <li v-for="city in cityList" :key="city.id" @click="test(city)"> {{ city.name }} - {{ city.admin1 }} - {{ city.country }}</li>
       </ul>
     </div>
-    <div class="answer" id="answer_geolocalisation">
-      <button v-on:click="meteoApiGeolocalisationAuto"> Quel temps fait il ici ? </button>
-    </div>
+  </div>
+  <div class="content">
     <div class="answer" id="answer">
+      <div class="answer_title" v-if="citySelect != null">
+        <h2> météo du jour à {{ citySelect.name }} </h2>
+      </div>
+      <div class="answer_title" v-if="citySelect == null">
+        <h2> météo du jour chez vous </h2>
+      </div>      
       <div class="answer" id="answer_weather" v-if="meteo">
-        <div class="answer_title">
-          <h2> météo du jour </h2>
-        </div>
         <h3>Temps : {{ temps }}</h3>
         <h4>Température : {{ meteo.current_weather.temperature }}°C</h4>
         <h4>Vitesse du vent : {{ meteo.current_weather.windspeed }}Km/h</h4>
       </div>
       <div class="answer_weather_presionnel">
+        <div class="answer_title">
+          <h2> Prévision des 3 prochains jours </h2>
+        </div>
         <div class="answer" id="answer_weather_previsionnel_0" v-if="meteo">
-          <div class="answer_title">
-            <h2> météo du jour </h2>
-          </div>
           <h3>{{ meteo.daily.time[0] }}</h3>
           <h4>Température max : {{ meteo.daily.temperature_2m_max[0] }}</h4>
           <h4>Température min : {{ meteo.daily.temperature_2m_min[0] }}°C</h4>
@@ -53,7 +50,6 @@
     </div>
   </div>
   <div class="footer">
-
   </div>
 </template>
 
@@ -65,15 +61,34 @@ export default {
   data(){
     return{
     requete: '',
-    city: null,
+    cityList: null,
+    citySelect: null,
     meteo: null,
     temps: null,
+    favoris: null,
+    favorisList: [],
     url_Pays: 'https://geocoding-api.open-meteo.com/v1/search?name=',
     url_meteo: 'https://api.open-meteo.com/v1/forecast?',
     }
   },
   methods: {
-    
+
+    test(city){
+      this.citySelect = city
+      console.log(this.citySelect);
+      axios       
+        .get(`${this.url_meteo}latitude=${this.citySelect.latitude}&longitude=${this.citySelect.longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${this.defDate(1)}&end_date=${this.defDate(3)}`)
+        .then(reponse => {
+          this.meteo = reponse.data
+          this.defWeatherCode();
+        })
+        .catch(err => {
+          console.error(err);
+        })
+      this.cityList = null
+      this.requete = ''
+    },
+
     defDate(jour){
       var date = new Date();
       date.setDate(date.getDate() + jour);
@@ -82,10 +97,6 @@ export default {
       var getDay = (date.toLocaleString("default", { day: "2-digit" }));
       var current_date = getYear + "-" + getMonth + "-" + getDay;
       return current_date;
-    },
-    
-    searchCity(){
-
     },
 
     defWeatherCode(){
@@ -119,31 +130,14 @@ export default {
     },
 
 
-    meteoApi(e){
+    meteoApi(){
 //-------------------------------------------------------------------------------------------//
       axios
       .get(`${this.url_Pays}${this.requete}&language=fr`)
       .then(reponse => {
-        this.city = reponse.data.results
-        console.log(this.city)
-//-------------------------------------------------------------------------------------------//   
-        if (e.key === "Enter"){
-          console.log('coucou')
-
-        // Déclaration de variable
-            // Appel de l'API
-          axios       
-          .get(`${this.url_meteo}latitude=${this.city[0].latitude}&longitude=${this.city[0].longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${this.defDate(1)}&end_date=${this.defDate(3)}`)
-          .then(reponse => {
-            this.meteo = reponse.data
-            this.defWeatherCode();
-          })
-          .catch(err => {
-            console.error(err);
-          })
-          this.requete = ''
-          this.city = null
-        }
+        this.cityList = reponse.data.results
+        console.log("methode : meteoAPI \nListe des villes \n")
+        console.log(this.cityList)
       })
       .catch(err => {
         console.error(err);
@@ -152,7 +146,7 @@ export default {
 
     meteoApiGeolocalisationAuto(){
       // Déclaration de variable
-      this.city = null
+      this.citySelect = null
       navigator.geolocation.getCurrentPosition((position) =>{
         axios
         .get(`${this.url_meteo}latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&daily=temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto&start_date=${this.defDate(1)}&end_date=${this.defDate(3)}`)
@@ -164,7 +158,32 @@ export default {
           console.error(err);
         })
       })
+    },
+
+    /*
+    //Favoris
+
+    favorisAdd(){
+      this.favorisList.push(this.citySelect)
+      console.log(this.favorisList);
+    },
+
+    favorisDelete(){
+      this.favorisList.pop(this.citySelect)
     }
+
+    <div class="Action" id="Action_favoris">
+      <button v-on:click="favorisAdd"> Ajouter aux favoris </button>
+      <button v-on:click="favorisDelete"> Supprimer des favoris </button>
+      <h2>Favoris</h2>
+      <ul>
+        <li v-for="favoris in favorisList" :key="favoris"> {{ favoris.name }}</li>
+      </ul>
+    </div>
+    */
+  },
+  beforeMount(){
+    this.meteoApiGeolocalisationAuto()
   },
 }
 </script>
